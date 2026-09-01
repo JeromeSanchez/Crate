@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crate</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #15141A;
+    --surface: #1E1D24;
+    --surface-hover: #26242E;
+    --border: #34323D;
+    --text: #F0EEF4;
+    --text-muted: #97949F;
+    --text-faint: #625F6B;
+    --accent: #E8A33D;
+    --accent-hover: #F2B458;
+    --accent-text: #1A1408;
+    --success: #5FBF7A;
+    --danger: #E8615B;
+    --radius: 7px;
+    --font-display: 'Space Grotesk', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .app {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 1.75rem 1.25rem 3rem;
+  }
+
+  .hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .hero h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 2.1rem;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+
+  .tagline {
+    color: var(--text-muted);
+    margin: .3rem 0 0;
+    font-size: .95rem;
+  }
+
+  .progress-badge {
+    font-family: var(--font-mono);
+    font-size: .78rem;
+    color: var(--accent);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: .4rem .8rem;
+    white-space: nowrap;
+  }
+
+  #waveformDivider {
+    margin: 1.25rem 0;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.15rem;
+    margin-bottom: 1rem;
+  }
+
+  .panel-label {
+    display: block;
+    color: var(--text-muted);
+    font-size: .85rem;
+    margin-bottom: .5rem;
+  }
+
+  textarea#pasteArea {
+    width: 100%;
+    min-height: 110px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: .88rem;
+    line-height: 1.45;
+    padding: .7rem .8rem;
+    resize: vertical;
+  }
+
+  textarea#pasteArea::placeholder { color: var(--text-faint); }
+
+  textarea#pasteArea:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-color: var(--accent);
+  }
+
+  .hint-static {
+    font-size: .78rem;
+    color: var(--text-faint);
+    margin: .55rem 0 0;
+    line-height: 1.5;
+  }
+
+  .hint-static a { color: var(--text-muted); }
+
+  .panel-controls {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    flex-wrap: wrap;
+    margin-top: .8rem;
+  }
+
+  button, .file-btn {
+    font-family: var(--font-body);
+    font-size: .85rem;
+    cursor: pointer;
+    border-radius: var(--radius);
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--accent-text);
+    border: none;
+    padding: .6rem 1.05rem;
+    font-weight: 600;
+  }
+  .btn-primary:hover { background: var(--accent-hover); }
+
+  .btn-secondary, .file-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: .58rem 1rem;
+    display: inline-flex;
+    align-items: center;
+  }
+  .btn-secondary:hover, .file-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-secondary:disabled { opacity: .4; cursor: not-allowed; }
+  .btn-secondary:disabled:hover { border-color: var(--border); color: var(--text); }
+
+  .btn-ghost {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    padding: .5rem .2rem;
+  }
+  .btn-ghost:disabled { opacity: .35; cursor: not-allowed; text-decoration: none; }
+
+  #parseHint { font-size: .78rem; color: var(--text-faint); }
+
+  .store-toggles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--border);
+  }
+
+  .store-pill {
+    --pill-color: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .38rem .7rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: .78rem;
+  }
+  .store-pill[data-active="true"] {
+    background: var(--pill-color);
+    border-color: var(--pill-color);
+    color: #12111A;
+    font-weight: 600;
+  }
+  .store-pill .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .store-pill[data-active="false"] .dot { background: var(--pill-color); }
+  .store-pill .fmt { opacity: .75; font-size: .72rem; }
+  .add-pill { border-style: dashed; }
+
+  .locale-select {
+    background: var(--bg);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: .38rem .6rem;
+    font-size: .74rem;
+    font-family: var(--font-body);
+  }
+
+  .results-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .6rem;
+    margin-bottom: .85rem;
+  }
+
+  .counts { font-family: var(--font-mono); font-size: .8rem; color: var(--text-muted); }
+
+  .toolbar-actions { display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; }
+
+  .check-label {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .8rem;
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+
+  .track-list { display: flex; flex-direction: column; gap: .5rem; }
+
+  .empty-state {
+    padding: 2.2rem 1rem;
+    text-align: center;
+    color: var(--text-faint);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    font-size: .88rem;
+  }
+
+  .track-row {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: .7rem .8rem;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    gap: .55rem;
+  }
+  .track-row:hover { background: var(--surface-hover); }
+  .track-row[data-status="found"] { border-color: var(--accent); }
+  .track-row[data-status="purchased"] { border-color: var(--success); }
+  .track-row[data-status="skip"] { opacity: .5; }
+
+  .track-fields {
+    display: grid;
+    grid-template-columns: 1.6rem 1fr 1fr auto;
+    gap: .5rem;
+    align-items: center;
+  }
+  @media (max-width: 560px) {
+    .track-fields { grid-template-columns: 1.4rem 1fr auto; }
+    .track-fields .artist-input { grid-column: 2 / 3; }
+  }
+
+  .track-index { font-family: var(--font-mono); color: var(--text-faint); font-size: .72rem; text-align: right; }
+
+  .track-fields input[type="text"] {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid transparent;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: .88rem;
+    padding: .2rem 0;
+    width: 100%;
+    min-width: 0;
+  }
+  .track-fields input[type="text"]:hover { border-bottom-color: var(--border); }
+  .track-fields input[type="text"]:focus-visible { outline: none; border-bottom-color: var(--accent); }
+
+  .remove-row {
+    background: none;
+    border: none;
+    color: var(--text-faint);
+    font-size: 1.05rem;
+    line-height: 1;
+    padding: .2rem .35rem;
+  }
+  .remove-row:hover { color: var(--danger); }
+
+  .track-actions { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+
+  .store-link {
+    --link-color: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .3rem .6rem;
+    border-radius: 5px;
+    border: 1px solid var(--link-color);
+    color: var(--link-color);
+    text-decoration: none;
+    font-size: .76rem;
+    font-weight: 600;
+  }
+  .store-link:hover { background: var(--link-color); color: #12111A; }
+  .store-link .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .all-stores-link { font-weight: 700; }
+
+  .status-select {
+    margin-left: auto;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: .3rem .5rem;
+    font-size: .76rem;
+    font-family: var(--font-body);
+  }
+
+  .notes {
+    margin-top: 1.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-faint);
+    font-size: .78rem;
+    line-height: 1.6;
+  }
+
+  button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="hero">
+    <div>
+      <h1>Crate</h1>
+      <p class="tagline">Turn a playlist into store links. Click, verify, buy.</p>
+    </div>
+    <div class="progress-badge" id="progressBadge">0 tracks</div>
+  </div>
+
+  <div id="waveformDivider"></div>
+
+  <section class="panel">
+    <label class="panel-label" for="pasteArea">Paste your tracklist</label>
+    <textarea id="pasteArea" placeholder="Select all tracks in Spotify (Ctrl/Cmd+A), copy (Ctrl/Cmd+C) and paste here — or paste a CSV export, or one &quot;Artist - Title&quot; per line."></textarea>
+    <p class="hint-static">No copy-paste handy? <a href="https://www.chosic.com/spotify-playlist-exporter/" target="_blank" rel="noopener noreferrer">chosic.com/spotify-playlist-exporter</a> or <a href="https://www.spotlistr.com/convert/spotify-to-export" target="_blank" rel="noopener noreferrer">spotlistr.com</a> turn a playlist link into a CSV you can upload below — no login needed for public playlists.</p>
+    <div class="panel-controls">
+      <button type="button" class="btn-primary" id="parseBtn">Parse tracklist</button>
+      <label class="file-btn">
+        Upload CSV
+        <input type="file" id="csvUpload" accept=".csv,.txt" hidden>
+      </label>
+      <span id="parseHint"></span>
+    </div>
+    <div class="store-toggles" id="storeToggles"></div>
+  </section>
+
+  <section class="panel">
+    <div class="results-toolbar">
+      <div class="counts" id="counts">No tracks yet</div>
+      <div class="toolbar-actions">
+        <label class="check-label"><input type="checkbox" id="hidePurchased"> Hide purchased</label>
+        <button type="button" class="btn-secondary" id="exportBtn" disabled>Export CSV</button>
+        <button type="button" class="btn-ghost" id="clearBtn" disabled>Clear all</button>
+      </div>
+    </div>
+    <div class="track-list" id="trackList">
+      <div class="empty-state"><p>No tracks parsed yet. Paste a tracklist above and hit Parse.</p></div>
+    </div>
+  </section>
+
+  <div class="notes">
+    Beatport and Traxsource sell WAV/AIFF (not FLAC) — Bandcamp and Qobuz are the ones to check for FLAC. Search links open each store's results page for the title and artist as typed; edit either field if a link doesn't turn up the right match, and always confirm you've got the correct mix/version before paying. Your track list and status marks are saved in this artifact so they're here next time you open it.
+  </div>
+
+</div>
+
+<script>
+  const BUILTIN_PLATFORMS = {
+    beatport: {
+      name: 'Beatport', color: '#3DFFA6', formats: 'WAV', domain: 'beatport.com',
+      url: (q) => `https://www.beatport.com/search?q=${encodeURIComponent(q)}`
+    },
+    traxsource: {
+      name: 'Traxsource', color: '#FF7A45', formats: 'AIFF/WAV', domain: 'traxsource.com',
+      url: (q) => `https://www.traxsource.com/search?term=${encodeURIComponent(q)}`
+    },
+    bandcamp: {
+      name: 'Bandcamp', color: '#5AC0D6', formats: 'FLAC/WAV', domain: 'bandcamp.com',
+      url: (q) => `https://bandcamp.com/search?q=${encodeURIComponent(q)}`
+    },
+    qobuz: {
+      name: 'Qobuz', color: '#8C9BFF', formats: 'FLAC', domain: 'qobuz.com',
+      url: (q) => `https://www.qobuz.com/${state.qobuzLocale}/search?q=${encodeURIComponent(q)}`
+    }
+  };
+
+  const QOBUZ_LOCALES = [
+    ['ch-fr', 'Qobuz region: Switzerland (FR)'],
+    ['fr-fr', 'Qobuz region: France'],
+    ['us-en', 'Qobuz region: US'],
+    ['gb-en', 'Qobuz region: UK'],
+    ['de-de', 'Qobuz region: Germany']
+  ];
+
+  let state = {
+    tracks: [],
+    platforms: { beatport: true, traxsource: true, bandcamp: true, qobuz: true },
+    qobuzLocale: 'ch-fr',
+    customPlatforms: [],
+    hidePurchased: false
+  };
+
+  // ---------- parsing ----------
+
+  function parseCsvLine(line) {
+    const result = [];
+    let cur = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (inQuotes) {
+        if (c === '"') {
+          if (line[i + 1] === '"') { cur += '"'; i++; }
+          else { inQuotes = false; }
+        } else { cur += c; }
+      } else {
+        if (c === '"') inQuotes = true;
+        else if (c === ',') { result.push(cur); cur = ''; }
+        else cur += c;
+      }
+    }
+    result.push(cur);
+    return result.map(s => s.trim());
+  }
+
+  function parseInput(raw) {
+    const lines = raw.split(/\r?\n/).map(l => l.replace(/\r$/, '')).filter(l => l.trim().length > 0);
+    if (lines.length === 0) return [];
+
+    const sample = lines.slice(0, Math.min(5, lines.length));
+
+    const tabCount = sample.filter(l => l.includes('\t')).length;
+    if (tabCount >= Math.ceil(sample.length / 2)) {
+      return lines
+        .map(l => l.split('\t'))
+        .filter(cols => cols.length >= 2 && !/^track ?name$/i.test(cols[0].trim()))
+        .map(cols => ({ title: cols[0].trim(), artist: cols[1].trim() }))
+        .filter(t => t.title || t.artist);
+    }
+
+    const pipeCount = sample.filter(l => l.includes('|')).length;
+    if (pipeCount >= Math.ceil(sample.length / 2)) {
+      return lines
+        .map(l => l.split('|'))
+        .filter(cols => cols.length >= 2)
+        .map(cols => ({ title: cols[0].trim(), artist: cols[1].trim() }))
+        .filter(t => t.title || t.artist);
+    }
+
+    const firstLower = lines[0].toLowerCase();
+    if (lines[0].includes(',') && /track ?name|^title|"title"/.test(firstLower) && /artist/.test(firstLower)) {
+      const headers = parseCsvLine(lines[0]).map(h => h.toLowerCase());
+      let titleIdx = headers.findIndex(h => /track ?name/.test(h) || h === 'title' || h === 'name');
+      let artistIdx = headers.findIndex(h => h.includes('artist') && !h.includes('url') && !h.includes('uri'));
+      if (titleIdx === -1) titleIdx = 0;
+      if (artistIdx === -1) artistIdx = 1;
+      return lines.slice(1).map(line => {
+        const cols = parseCsvLine(line);
+        return { title: (cols[titleIdx] || '').trim(), artist: (cols[artistIdx] || '').trim() };
+      }).filter(t => t.title || t.artist);
+    }
+
+    const dashCount = lines.filter(l => / - /.test(l)).length;
+    if (dashCount >= Math.ceil(lines.length / 2)) {
+      return lines.map(l => {
+        const idx = l.indexOf(' - ');
+        if (idx === -1) return { title: l.trim(), artist: '' };
+        return { artist: l.slice(0, idx).trim(), title: l.slice(idx + 3).trim() };
+      });
+    }
+
+    return lines.map(l => ({ title: l.trim(), artist: '' }));
+  }
+
+  function makeId(artist, title) {
+    return (artist.toLowerCase().trim() + '|' + title.toLowerCase().trim()).replace(/\s+/g, ' ');
+  }
+
+  // ---------- persistence ----------
+  // Uses Claude.ai's window.storage when it's present (inside an artifact),
+  // and transparently falls back to localStorage anywhere else — GitHub
+  // Pages, your own server, or even a file opened straight from disk —
+  // so this single file works unmodified in both places.
+
+  const hasClaudeStorage = typeof window.storage !== 'undefined' && window.storage !== null;
+
+  async function storageGet(key) {
+    if (hasClaudeStorage) {
+      try { return await window.storage.get(key); } catch (e) { return null; }
+    }
+    try {
+      const v = localStorage.getItem('crate:' + key);
+      return v === null ? null : { value: v };
+    } catch (e) { return null; }
+  }
+
+  async function storageSet(key, value) {
+    if (hasClaudeStorage) {
+      try { await window.storage.set(key, value); } catch (e) { console.error('save failed', e); }
+      return;
+    }
+    try { localStorage.setItem('crate:' + key, value); } catch (e) { console.error('save failed', e); }
+  }
+
+  async function saveTracks() { await storageSet('crate-tracks', JSON.stringify(state.tracks)); }
+  async function savePlatforms() { await storageSet('crate-platforms', JSON.stringify(state.platforms)); }
+  async function saveQobuzLocale() { await storageSet('crate-qobuz-locale', state.qobuzLocale); }
+  async function saveCustomPlatforms() { await storageSet('crate-custom-platforms', JSON.stringify(state.customPlatforms)); }
+
+  async function loadPersisted() {
+    try { const r = await storageGet('crate-tracks'); if (r && r.value) state.tracks = JSON.parse(r.value); } catch (e) { /* nothing saved yet */ }
+    try { const r = await storageGet('crate-platforms'); if (r && r.value) state.platforms = JSON.parse(r.value); } catch (e) { /* nothing saved yet */ }
+    try { const r = await storageGet('crate-qobuz-locale'); if (r && r.value) state.qobuzLocale = r.value; } catch (e) { /* nothing saved yet */ }
+    try { const r = await storageGet('crate-custom-platforms'); if (r && r.value) state.customPlatforms = JSON.parse(r.value); } catch (e) { /* nothing saved yet */ }
+    renderStoreToggles();
+    renderTrackList();
+  }
+
+  // ---------- rendering ----------
+
+  function renderWaveform() {
+    const container = document.getElementById('waveformDivider');
+    const bars = 56;
+    let svg = `<svg viewBox="0 0 ${bars * 6} 26" preserveAspectRatio="none" style="width:100%;height:26px;display:block;">`;
+    let seed = 7;
+    for (let i = 0; i < bars; i++) {
+      seed = (seed * 9301 + 49297) % 233280;
+      const rnd = seed / 233280;
+      const h = 4 + rnd * 18;
+      const y = (26 - h) / 2;
+      svg += `<rect x="${i * 6}" y="${y.toFixed(1)}" width="3" height="${h.toFixed(1)}" rx="1.5" fill="var(--accent)" opacity="${(0.25 + rnd * 0.35).toFixed(2)}"></rect>`;
+    }
+    svg += '</svg>';
+    container.innerHTML = svg;
+  }
+
+  function renderStoreToggles() {
+    const container = document.getElementById('storeToggles');
+    container.innerHTML = '';
+
+    Object.entries(BUILTIN_PLATFORMS).forEach(([key, p]) => {
+      const active = state.platforms[key] !== false;
+      const pill = document.createElement('button');
+      pill.type = 'button';
+      pill.className = 'store-pill';
+      pill.dataset.active = String(active);
+      pill.style.setProperty('--pill-color', p.color);
+      pill.innerHTML = `<span class="dot"></span>${p.name}<span class="fmt">${p.formats}</span>`;
+      pill.addEventListener('click', () => {
+        state.platforms[key] = !active;
+        savePlatforms();
+        renderStoreToggles();
+        renderTrackList();
+      });
+      container.appendChild(pill);
+    });
+
+    if (state.platforms.qobuz !== false) {
+      const sel = document.createElement('select');
+      sel.className = 'locale-select';
+      sel.title = 'Qobuz store region';
+      QOBUZ_LOCALES.forEach(([val, label]) => {
+        const opt = document.createElement('option');
+        opt.value = val; opt.textContent = label;
+        if (val === state.qobuzLocale) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      sel.addEventListener('change', () => {
+        state.qobuzLocale = sel.value;
+        saveQobuzLocale();
+        renderTrackList();
+      });
+      container.appendChild(sel);
+    }
+
+    state.customPlatforms.forEach((cp) => {
+      const active = cp.active !== false;
+      const pill = document.createElement('button');
+      pill.type = 'button';
+      pill.className = 'store-pill';
+      pill.dataset.active = String(active);
+      pill.style.setProperty('--pill-color', cp.color || '#B7B4C0');
+      pill.innerHTML = `<span class="dot"></span>${cp.name}<span class="fmt">custom</span>`;
+      pill.addEventListener('click', () => {
+        cp.active = !active;
+        saveCustomPlatforms();
+        renderStoreToggles();
+        renderTrackList();
+      });
+      container.appendChild(pill);
+    });
+
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'store-pill add-pill';
+    addBtn.textContent = '+ Add store';
+    addBtn.addEventListener('click', openAddPlatformPrompt);
+    container.appendChild(addBtn);
+  }
+
+  function openAddPlatformPrompt() {
+    const name = prompt('Store name (e.g. Discogs):');
+    if (!name) return;
+    const template = prompt('Search URL template — use {q} where the search text goes.\ne.g. https://www.discogs.com/search/?q={q}&type=release');
+    if (!template || !template.includes('{q}')) {
+      alert('That URL needs a {q} placeholder for the search text.');
+      return;
+    }
+    const palette = ['#B7B4C0', '#F2789F', '#8FD694', '#F2C14E', '#C792EA'];
+    const color = palette[state.customPlatforms.length % palette.length];
+    state.customPlatforms.push({ id: 'custom-' + Date.now(), name, urlTemplate: template, color, active: true });
+    saveCustomPlatforms();
+    renderStoreToggles();
+    renderTrackList();
+  }
+
+  function buildActionLinks(actions, track, enabledBuiltins, enabledCustoms, googleDomains) {
+    actions.innerHTML = '';
+    const query = `${track.artist} ${track.title}`.trim();
+
+    if (googleDomains.length > 0 && query) {
+      const allLink = document.createElement('a');
+      allLink.href = `https://www.google.com/search?q=${encodeURIComponent(query)}+(${googleDomains.map(d => 'site:' + d).join(' OR ')})`;
+      allLink.target = '_blank';
+      allLink.rel = 'noopener noreferrer';
+      allLink.className = 'store-link all-stores-link';
+      allLink.textContent = 'Search all stores';
+      actions.appendChild(allLink);
+    }
+
+    enabledBuiltins.forEach(([key, p]) => {
+      const a = document.createElement('a');
+      a.href = p.url(query);
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.className = 'store-link';
+      a.style.setProperty('--link-color', p.color);
+      a.innerHTML = `<span class="dot"></span>${p.name}`;
+      actions.appendChild(a);
+    });
+
+    enabledCustoms.forEach((cp) => {
+      const a = document.createElement('a');
+      a.href = cp.urlTemplate.replace('{q}', encodeURIComponent(query));
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.className = 'store-link';
+      a.style.setProperty('--link-color', cp.color);
+      a.innerHTML = `<span class="dot"></span>${cp.name}`;
+      actions.appendChild(a);
+    });
+
+    const statusSelect = document.createElement('select');
+    statusSelect.className = 'status-select';
+    [['pending', 'Pending'], ['found', 'Found'], ['purchased', 'Purchased'], ['skip', 'Skip']].forEach(([val, label]) => {
+      const opt = document.createElement('option');
+      opt.value = val; opt.textContent = label;
+      if (val === track.status) opt.selected = true;
+      statusSelect.appendChild(opt);
+    });
+    statusSelect.addEventListener('change', () => {
+      track.status = statusSelect.value;
+      saveTracks();
+      renderTrackList();
+    });
+    actions.appendChild(statusSelect);
+  }
+
+  function renderTrackList() {
+    const container = document.getElementById('trackList');
+    container.innerHTML = '';
+
+    if (state.tracks.length === 0) {
+      container.innerHTML = '<div class="empty-state"><p>No tracks parsed yet. Paste a tracklist above and hit Parse.</p></div>';
+      renderCounts();
+      return;
+    }
+
+    const visibleTracks = state.tracks.filter(t => !(state.hidePurchased && t.status === 'purchased'));
+    if (visibleTracks.length === 0) {
+      container.innerHTML = '<div class="empty-state"><p>Everything visible is marked purchased. Uncheck "Hide purchased" to see the full list.</p></div>';
+      renderCounts();
+      return;
+    }
+
+    const enabledBuiltins = Object.entries(BUILTIN_PLATFORMS).filter(([k]) => state.platforms[k] !== false);
+    const enabledCustoms = state.customPlatforms.filter(cp => cp.active !== false);
+    const googleDomains = enabledBuiltins.map(([, p]) => p.domain);
+
+    visibleTracks.forEach((track) => {
+      const row = document.createElement('div');
+      row.className = 'track-row';
+      row.dataset.status = track.status;
+
+      const fields = document.createElement('div');
+      fields.className = 'track-fields';
+
+      const idx = document.createElement('span');
+      idx.className = 'track-index';
+      idx.textContent = String(state.tracks.indexOf(track) + 1);
+
+      const titleInput = document.createElement('input');
+      titleInput.type = 'text';
+      titleInput.value = track.title;
+      titleInput.placeholder = 'Title';
+
+      const artistInput = document.createElement('input');
+      artistInput.type = 'text';
+      artistInput.className = 'artist-input';
+      artistInput.value = track.artist;
+      artistInput.placeholder = 'Artist';
+
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'remove-row';
+      removeBtn.textContent = '\u00d7';
+      removeBtn.title = 'Remove track';
+
+      fields.appendChild(idx);
+      fields.appendChild(titleInput);
+      fields.appendChild(artistInput);
+      fields.appendChild(removeBtn);
+
+      const actions = document.createElement('div');
+      actions.className = 'track-actions';
+      buildActionLinks(actions, track, enabledBuiltins, enabledCustoms, googleDomains);
+
+      titleInput.addEventListener('input', () => { track.title = titleInput.value; saveTracks(); });
+      titleInput.addEventListener('change', () => buildActionLinks(actions, track, enabledBuiltins, enabledCustoms, googleDomains));
+      artistInput.addEventListener('input', () => { track.artist = artistInput.value; saveTracks(); });
+      artistInput.addEventListener('change', () => buildActionLinks(actions, track, enabledBuiltins, enabledCustoms, googleDomains));
+      removeBtn.addEventListener('click', () => {
+        state.tracks = state.tracks.filter(t => t !== track);
+        saveTracks();
+        renderTrackList();
+      });
+
+      row.appendChild(fields);
+      row.appendChild(actions);
+      container.appendChild(row);
+    });
+
+    renderCounts();
+  }
+
+  function renderCounts() {
+    const total = state.tracks.length;
+    const purchased = state.tracks.filter(t => t.status === 'purchased').length;
+    document.getElementById('counts').textContent = total === 0 ? 'No tracks yet' : `${total} track${total === 1 ? '' : 's'} \u00b7 ${purchased} purchased`;
+    document.getElementById('progressBadge').textContent = total === 0 ? '0 tracks' : `${purchased}/${total} purchased`;
+    document.getElementById('exportBtn').disabled = total === 0;
+    document.getElementById('clearBtn').disabled = total === 0;
+  }
+
+  function csvEscape(s) {
+    s = String(s === undefined || s === null ? '' : s);
+    if (/[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+
+  // ---------- events ----------
+
+  document.getElementById('parseBtn').addEventListener('click', () => {
+    const raw = document.getElementById('pasteArea').value;
+    const parsed = parseInput(raw);
+    const hint = document.getElementById('parseHint');
+    if (parsed.length === 0) {
+      hint.textContent = 'Nothing recognized \u2014 paste a tracklist first.';
+      return;
+    }
+    const existingById = {};
+    state.tracks.forEach(t => { existingById[t.id] = t; });
+    state.tracks = parsed.map(p => {
+      const id = makeId(p.artist, p.title);
+      const prev = existingById[id];
+      return { id, title: p.title, artist: p.artist, status: prev ? prev.status : 'pending' };
+    });
+    saveTracks();
+    renderTrackList();
+    hint.textContent = `Parsed ${parsed.length} track${parsed.length === 1 ? '' : 's'}.`;
+  });
+
+  document.getElementById('csvUpload').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      document.getElementById('pasteArea').value = evt.target.result;
+      document.getElementById('parseBtn').click();
+    };
+    reader.readAsText(file);
+  });
+
+  document.getElementById('hidePurchased').addEventListener('change', (e) => {
+    state.hidePurchased = e.target.checked;
+    renderTrackList();
+  });
+
+  document.getElementById('exportBtn').addEventListener('click', () => {
+    const rows = [['Title', 'Artist', 'Status']];
+    state.tracks.forEach(t => rows.push([t.title, t.artist, t.status]));
+    const csv = rows.map(r => r.map(csvEscape).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'crate-list.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    if (!confirm('Clear all tracks from this list? This can\'t be undone.')) return;
+    state.tracks = [];
+    saveTracks();
+    renderTrackList();
+  });
+
+  renderWaveform();
+  loadPersisted();
+</script>
+</body>
+</html>
