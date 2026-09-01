@@ -14,7 +14,14 @@ Turn a Spotify playlist into ready-to-click search links on Beatport, Traxsource
 
 ## Getting a tracklist out of Spotify
 
-Open the playlist, select all tracks (Ctrl/Cmd+A), copy (Ctrl/Cmd+C), and paste into the tool — Spotify copies title and artist automatically, no login needed.
+**Option A — import the playlist link directly.** Paste a `open.spotify.com/playlist/...` link into the "Import from a Spotify playlist link" box and hit Import. This needs a one-time setup and has two hard requirements from Spotify's side:
+
+- The Spotify account you connect needs an active **Premium** subscription.
+- Spotify only returns track data for playlists you **own or collaborate on** — not ones you just follow.
+
+Setup: create an app at [developer.spotify.com/dashboard](https://developer.spotify.com/dashboard), open "Spotify connection" in the tool and copy the Redirect URI shown there into the app's settings, then paste the app's **Client ID** (not the secret — this flow never uses it) into the tool. This is stored only in your browser.
+
+**Option B — copy/paste.** Open the playlist, select all tracks (Ctrl/Cmd+A), copy (Ctrl/Cmd+C), and paste into the tool — Spotify copies title and artist automatically, no login needed. Works for any playlist, including ones you don't own.
 
 If that's awkward on your setup, [chosic.com/spotify-playlist-exporter](https://www.chosic.com/spotify-playlist-exporter/) or [spotlistr.com](https://www.spotlistr.com/convert/spotify-to-export) turn a playlist link into a CSV you can upload instead.
 
