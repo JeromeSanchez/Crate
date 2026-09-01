@@ -376,6 +376,11 @@
   .store-link:hover { background: var(--link-color); color: #12111A; }
   .store-link .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
   .all-stores-link { font-weight: 700; }
+  button.open-all-link {
+    --link-color: var(--text-muted);
+    font-family: var(--font-body);
+    border-style: dashed;
+  }
 
   .status-select {
     margin-left: auto;
@@ -729,6 +734,7 @@
   function buildActionLinks(actions, track, enabledBuiltins, enabledCustoms, googleDomains) {
     actions.innerHTML = '';
     const query = `${track.artist} ${track.title}`.trim();
+    const directUrls = [];
 
     if (googleDomains.length > 0 && query) {
       const allLink = document.createElement('a');
@@ -741,8 +747,10 @@
     }
 
     enabledBuiltins.forEach(([key, p]) => {
+      const href = p.url(query);
+      directUrls.push(href);
       const a = document.createElement('a');
-      a.href = p.url(query);
+      a.href = href;
       a.target = '_blank';
       a.rel = 'noopener noreferrer';
       a.className = 'store-link';
@@ -752,8 +760,10 @@
     });
 
     enabledCustoms.forEach((cp) => {
+      const href = cp.urlTemplate.replace('{q}', encodeURIComponent(query));
+      directUrls.push(href);
       const a = document.createElement('a');
-      a.href = cp.urlTemplate.replace('{q}', encodeURIComponent(query));
+      a.href = href;
       a.target = '_blank';
       a.rel = 'noopener noreferrer';
       a.className = 'store-link';
@@ -761,6 +771,18 @@
       a.innerHTML = `<span class="dot"></span>${cp.name}`;
       actions.appendChild(a);
     });
+
+    if (directUrls.length > 1) {
+      const openAllBtn = document.createElement('button');
+      openAllBtn.type = 'button';
+      openAllBtn.className = 'store-link open-all-link';
+      openAllBtn.textContent = 'Open all tabs';
+      openAllBtn.title = 'Opens each enabled store\u2019s search in its own tab';
+      openAllBtn.addEventListener('click', () => {
+        directUrls.forEach((href) => window.open(href, '_blank', 'noopener,noreferrer'));
+      });
+      actions.appendChild(openAllBtn);
+    }
 
     const statusSelect = document.createElement('select');
     statusSelect.className = 'status-select';
