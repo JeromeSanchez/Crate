@@ -592,6 +592,34 @@
     return (artist.toLowerCase().trim() + '|' + title.toLowerCase().trim()).replace(/\s+/g, ' ');
   }
 
+  // Keeps searches from failing when Spotify/CSV data packs multiple credited
+  // artists or a "feat." credit into one field — most store search boxes do
+  // much better with just the primary artist and a clean title. Mix/edit
+  // descriptors like "(Extended Mix)" or "(Radio Edit)" are left alone since
+  // those often matter for finding the right version.
+  function cleanArtistField(artistField) {
+    return String(artistField || '').split(',')[0].trim();
+  }
+
+  function cleanTitleField(title) {
+    let t = String(title || '');
+    t = t.replace(/\s*[\(\[][^)\]]*\b(feat\.?|featuring|ft\.?)\b[^)\]]*[\)\]]/gi, '');
+    t = t.replace(/\s+(feat\.|featuring|ft\.)\s+.+$/i, '');
+    return t.trim();
+  }
+
+  function mergeParsedTracks(parsed) {
+    const existingById = {};
+    state.tracks.forEach((t) => { existingById[t.id] = t; });
+    return parsed.map((p) => {
+      const title = cleanTitleField(p.title);
+      const artist = cleanArtistField(p.artist);
+      const id = makeId(artist, title);
+      const prev = existingById[id];
+      return { id, title, artist, status: prev ? prev.status : 'pending' };
+    });
+  }
+
   // ---------- persistence ----------
   // Uses Claude.ai's window.storage when it's present (inside an artifact),
   // and transparently falls back to localStorage anywhere else — GitHub
@@ -1108,13 +1136,7 @@
         return;
       }
 
-      const existingById = {};
-      state.tracks.forEach((t) => { existingById[t.id] = t; });
-      state.tracks = parsed.map((p) => {
-        const id = makeId(p.artist, p.title);
-        const prev = existingById[id];
-        return { id, title: p.title, artist: p.artist, status: prev ? prev.status : 'pending' };
-      });
+      state.tracks = mergeParsedTracks(parsed);
       saveTracks();
       renderTrackList();
       setSpotifyStatus('Imported ' + parsed.length + ' track' + (parsed.length === 1 ? '' : 's') + ' from Spotify.');
@@ -1145,13 +1167,7 @@
       hint.textContent = 'Nothing recognized \u2014 paste a tracklist first.';
       return;
     }
-    const existingById = {};
-    state.tracks.forEach(t => { existingById[t.id] = t; });
-    state.tracks = parsed.map(p => {
-      const id = makeId(p.artist, p.title);
-      const prev = existingById[id];
-      return { id, title: p.title, artist: p.artist, status: prev ? prev.status : 'pending' };
-    });
+    state.tracks = mergeParsedTracks(parsed);
     saveTracks();
     renderTrackList();
     hint.textContent = `Parsed ${parsed.length} track${parsed.length === 1 ? '' : 's'}.`;
